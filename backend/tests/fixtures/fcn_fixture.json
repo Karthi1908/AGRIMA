@@ -1,0 +1,35 @@
+{
+  "archetype": "fcn",
+  "title": "3-Stock Worst-Of Fixed Coupon Note",
+  "currency": "USD",
+  "notional": 500000.0,
+  "tenor_months": 12,
+  "underlyings": [
+    {
+      "symbol": "AAPL",
+      "initial_price": 225.0,
+      "current_price": 225.0
+    },
+    {
+      "symbol": "MSFT",
+      "initial_price": 430.0,
+      "current_price": 430.0
+    },
+    {
+      "symbol": "NVDA",
+      "initial_price": 120.0,
+      "current_price": 120.0
+    }
+  ],
+  "autocall_barrier_pct": 1.0,
+  "coupon_barrier_pct": 0.8,
+  "knock_in_barrier_pct": 0.7,
+  "annualized_coupon": 0.12,
+  "memory_coupon": true,
+  "observation_type": "european",
+  "observation_frequency": "monthly",
+  "confidence_scores": {
+    "knock_in_barrier_pct": 0.94,
+    "annualized_coupon": 0.97
+  }
+}

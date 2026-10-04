@@ -1,0 +1,273 @@
+openapi: 3.0.3
+info:
+  title: AGRIMA Structured Product Explainer API
+  description: Ephemeral, stateless API for termsheet ingestion, parameter verification, and payoff simulation.
+  version: 1.0.0
+paths:
+  /api/termsheets/parse:
+    post:
+      summary: Upload and extract economic parameters from a termsheet document
+      description: Ingests PDF or image termsheets, scrubs party identities, and returns normalized structured product parameters.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Termsheet file (PDF, PNG, or JPEG up to 25MB)
+      responses:
+        '200':
+          description: Termsheet successfully extracted and sanitized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TermsheetExtractionResponse'
+        '400':
+          description: Invalid file format or corrupted document
+        '422':
+          description: Unparseable document structure
+
+  /api/simulation/calculate:
+    post:
+      summary: Deterministically compute payoff state for given market scenarios
+      description: Evaluates observation dates, barrier breaches, coupon accruals, and worst-of asset payoff.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - product
+                - simulated_prices
+              properties:
+                product:
+                  $ref: '#/components/schemas/StructuredProductDefinition'
+                simulated_prices:
+                  type: object
+                  additionalProperties:
+                    type: number
+                  description: Map of asset symbol to simulated current price
+                target_period:
+                  type: integer
+                  description: Optional observation period index being evaluated
+      responses:
+        '200':
+          description: Payoff state successfully computed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayoffSimulationState'
+
+  /api/narrative/generate:
+    post:
+      summary: Generate plain-language executive scenario narratives
+      description: Uses Gemini via ADK ClientNarrativeAgent to synthesize Best, Base, and Worst case explanations.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - product
+              properties:
+                product:
+                  $ref: '#/components/schemas/StructuredProductDefinition'
+      responses:
+        '200':
+          description: Scenario narratives generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioNarratives'
+
+components:
+  schemas:
+    ProductArchetype:
+      type: string
+      enum:
+        - DCI
+        - EQUITY_AUTOCALL_OPTION
+        - EQUITY_AUTOCALL_SWAP
+        - FCN_AUTOCALL_NOTE
+        - TWIN_WIN_NOTE
+        - STEP_UP_AUTOCALL_NOTE
+        - STEP_DOWN_AUTOCALL_NOTE
+
+    UnderlyingAsset:
+      type: object
+      required:
+        - symbol
+        - name
+        - currency
+        - initial_fixing
+        - simulated_price
+        - performance_pct
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+        currency:
+          type: string
+        initial_fixing:
+          type: number
+        simulated_price:
+          type: number
+        performance_pct:
+          type: number
+
+    BarrierObservation:
+      type: object
+      required:
+        - period_index
+        - observation_date
+        - coupon_rate_pct
+        - has_memory
+      properties:
+        period_index:
+          type: integer
+        observation_date:
+          type: string
+        knock_out_barrier_pct:
+          type: number
+          nullable: true
+        knock_in_barrier_pct:
+          type: number
+          nullable: true
+        coupon_barrier_pct:
+          type: number
+          nullable: true
+        coupon_rate_pct:
+          type: number
+        has_memory:
+          type: boolean
+        knock_in_observation_type:
+          type: string
+          enum:
+            - EUROPEAN
+            - AMERICAN
+          default: EUROPEAN
+
+    StructuredProductDefinition:
+      type: object
+      required:
+        - product_id
+        - archetype
+        - denomination_currency
+        - notional_amount
+        - issue_date
+        - maturity_date
+        - underlyings
+        - barrier_schedule
+        - capital_protection_pct
+      properties:
+        product_id:
+          type: string
+        archetype:
+          $ref: '#/components/schemas/ProductArchetype'
+        denomination_currency:
+          type: string
+        notional_amount:
+          type: number
+        issue_date:
+          type: string
+        maturity_date:
+          type: string
+        underlyings:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnderlyingAsset'
+        barrier_schedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/BarrierObservation'
+        capital_protection_pct:
+          type: number
+
+    PayoffSimulationState:
+      type: object
+      required:
+        - is_knocked_out
+        - is_knocked_in
+        - worst_performing_asset
+        - total_coupons_earned_pct
+        - capital_repaid_pct
+        - net_total_return_pct
+        - net_payout_amount
+      properties:
+        is_knocked_out:
+          type: boolean
+        early_redemption_period:
+          type: integer
+          nullable: true
+        is_knocked_in:
+          type: boolean
+        worst_performing_asset:
+          $ref: '#/components/schemas/UnderlyingAsset'
+        tied_worst_of_assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnderlyingAsset'
+        worst_of_tie_broken_by:
+          type: string
+          nullable: true
+        total_coupons_earned_pct:
+          type: number
+        capital_repaid_pct:
+          type: number
+        net_total_return_pct:
+          type: number
+        net_payout_amount:
+          type: number
+        dci_settlement_currency:
+          type: string
+          nullable: true
+
+    ScenarioNarratives:
+      type: object
+      required:
+        - best_case
+        - base_case
+        - worst_case
+      properties:
+        best_case:
+          type: string
+        base_case:
+          type: string
+        worst_case:
+          type: string
+
+    TermsheetExtractionResponse:
+      type: object
+      required:
+        - field_confidence
+        - flagged_warnings
+        - is_rejected
+      properties:
+        product:
+          $ref: '#/components/schemas/StructuredProductDefinition'
+          nullable: true
+        field_confidence:
+          type: object
+          additionalProperties:
+            type: number
+        flagged_warnings:
+          type: array
+          items:
+            type: string
+        is_rejected:
+          type: boolean
+        rejection_reason:
+          type: string
+          nullable: true
+        rejection_guidance:
+          type: string
+          nullable: true

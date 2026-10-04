@@ -1,0 +1,37 @@
+{
+  "archetype": "step_down_autocall",
+  "title": "TSLA Step-Down Autocall Note",
+  "currency": "USD",
+  "notional": 250000.0,
+  "underlyings": [
+    {
+      "symbol": "TSLA",
+      "initial_price": 240.0,
+      "current_price": 240.0
+    }
+  ],
+  "autocall_schedule": [
+    {
+      "period": 1,
+      "barrier_pct": 1.0
+    },
+    {
+      "period": 2,
+      "barrier_pct": 0.95
+    },
+    {
+      "period": 3,
+      "barrier_pct": 0.9
+    },
+    {
+      "period": 4,
+      "barrier_pct": 0.85
+    }
+  ],
+  "knock_in_barrier_pct": 0.65,
+  "annualized_coupon": 0.105,
+  "observation_type": "european",
+  "confidence_scores": {
+    "knock_in_barrier_pct": 0.91
+  }
+}

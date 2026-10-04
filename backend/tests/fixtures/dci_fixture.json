@@ -1,0 +1,16 @@
+{
+  "archetype": "dual_currency_investment",
+  "title": "USD/EUR Dual Currency Investment",
+  "base_currency": "USD",
+  "alternate_currency": "EUR",
+  "notional": 100000.0,
+  "tenor_days": 45,
+  "initial_spot": 1.095,
+  "strike_rate": 1.08,
+  "annualized_coupon": 0.085,
+  "observation_type": "european",
+  "confidence_scores": {
+    "strike_rate": 0.98,
+    "annualized_coupon": 0.95
+  }
+}

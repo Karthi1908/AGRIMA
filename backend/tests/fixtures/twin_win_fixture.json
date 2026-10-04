@@ -1,0 +1,21 @@
+{
+  "archetype": "twin_win",
+  "title": "SPY 18M Twin-Win Certificate",
+  "currency": "USD",
+  "notional": 100000.0,
+  "underlyings": [
+    {
+      "symbol": "SPY",
+      "initial_price": 560.0,
+      "current_price": 560.0
+    }
+  ],
+  "knock_in_barrier_pct": 0.75,
+  "upside_participation": 1.0,
+  "cap_pct": 1.25,
+  "observation_type": "american",
+  "confidence_scores": {
+    "knock_in_barrier_pct": 0.92,
+    "cap_pct": 0.88
+  }
+}
