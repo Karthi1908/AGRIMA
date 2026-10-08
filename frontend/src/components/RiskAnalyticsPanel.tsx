@@ -102,15 +102,17 @@ export const RiskAnalyticsPanel: React.FC<RiskAnalyticsPanelProps> = ({ product,
 
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setDraft(prev => ({ ...prev, [k]: v }));
 
-  const run = () => {
-    const parsed = parseDraft(draft, multi);
+  const run = (overrideDraft?: Draft) => {
+    const d = overrideDraft || draft;
+    const currentDraftKey = JSON.stringify(d);
+    const parsed = parseDraft(d, multi);
     if ('error' in parsed && parsed.error) { setFormError(parsed.error); return; }
     setFormError(null);
     const assumptions = parsed.assumptions!;
     const id = ++reqId.current;
     setLoading(true);
     setError(null);
-    fetch('http://localhost:8000/api/simulate', {
+    fetch('/api/simulate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ product, assumptions }),
@@ -123,7 +125,7 @@ export const RiskAnalyticsPanel: React.FC<RiskAnalyticsPanelProps> = ({ product,
         if (id !== reqId.current) return;
         setResult(data);
         setApplied(assumptions);
-        setAppliedKey(draftKey);
+        setAppliedKey(currentDraftKey);
         setLoading(false);
       })
       .catch(err => {
@@ -134,9 +136,16 @@ export const RiskAnalyticsPanel: React.FC<RiskAnalyticsPanelProps> = ({ product,
       });
   };
 
-  // Initial run for single-underlying products (defaults are visible and editable above the results).
+  // Initial run for all products (defaults are visible and editable above the results).
   useEffect(() => {
-    if (product.archetype === 'EQUITY_ACCUMULATOR' && !multi) run();
+    let currentDraft = { ...draft };
+    if (multi) {
+      const n = product.underlyings.length;
+      const corr = Array(n).fill(0).map((_, i) => Array(n).fill(0).map((_, j) => (i === j ? 1.0 : 0.5)));
+      currentDraft.correlation = JSON.stringify(corr);
+      setDraft(currentDraft);
+    }
+    run(currentDraft);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product]);
 
@@ -160,13 +169,7 @@ export const RiskAnalyticsPanel: React.FC<RiskAnalyticsPanelProps> = ({ product,
     }
   };
 
-  if (!['EQUITY_ACCUMULATOR', 'EQUITY_FCN'].includes(product.archetype)) return null;
-
-  const userSupplied = [
-    ...(draft.driftOverride ? ['drift (override)'] : []),
-    ...(multi ? ['correlation'] : []),
-  ];
-
+  if (product.archetype === 'DCI') return null; // DCI has a separate analytics view
   return (
     <div id="risk-analytics-container">
       <div className="editorial-card" style={{ padding: '16px', marginBottom: '16px' }}>

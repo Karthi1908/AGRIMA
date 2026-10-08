@@ -1,0 +1,18 @@
+{
+    "archetype": "DCI",
+    "title": "EUR/USD DCI",
+    "denomination_currency": "USD",
+    "notional_amount": 100000.0,
+    "issue_date": "2026-10-01",
+    "maturity_date": "2026-11-15",
+    "underlyings": [
+        {"symbol": "EUR/USD", "name": "EUR/USD FX", "currency": "USD", "initial_fixing": 1.0950}
+    ],
+    "barrier_schedule": [],
+    "dci_parameters": {
+        "base_currency": "USD",
+        "alternate_currency": "EUR",
+        "strike_rate": 1.0800,
+        "tenor_days": 45
+    }
+}

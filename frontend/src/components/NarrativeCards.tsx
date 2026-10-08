@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sparkles, TrendingUp, ShieldCheck, AlertTriangle, RefreshCw } from 'lucide-react';
 import { StructuredProductDefinition, ScenarioNarratives } from '../types';
 
@@ -10,6 +10,11 @@ export const NarrativeCards: React.FC<NarrativeCardsProps> = ({ product }) => {
   const [narratives, setNarratives] = useState<ScenarioNarratives | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setNarratives(null);
+    setError(null);
+  }, [product.product_id]);
 
   const fetchNarratives = async () => {
     setIsLoading(true);

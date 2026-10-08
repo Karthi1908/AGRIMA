@@ -14,7 +14,8 @@ class ExtractorAgent(ADKOrchestrator):
         3. If a parameter is explicitly found, provenance should be 'FOUND'.
         4. If a parameter is inferred from context (e.g. standard market conventions), provenance should be 'INFERRED' and add the field name to flagged_warnings.
         5. If a required parameter is completely missing, guess a safe default but set provenance to 'MISSING' and add the field name to flagged_warnings.
-        6. If multiple conflicting definitions exist for a parameter (e.g. multiple strike prices), set provenance to 'CONFLICT' and add the field name to flagged_warnings. THIS IS A HARD BLOCKER for verification.
+        6. EXCEPTION: If `capital_protection_pct` is not explicitly mentioned, assume 0.0, set its provenance to 'FOUND', and DO NOT add it to flagged_warnings (as 0% is the standard for at-risk products).
+        7. If multiple conflicting definitions exist for a parameter (e.g. multiple strike prices), set provenance to 'CONFLICT' and add the field name to flagged_warnings. THIS IS A HARD BLOCKER for verification.
         
         Ensure accuracy. Zero-retention and strict anonymity must be maintained.
         """

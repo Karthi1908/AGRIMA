@@ -1,0 +1,22 @@
+{
+    "archetype": "EQUITY_ACCUMULATOR",
+    "title": "NVDA Accumulator",
+    "denomination_currency": "USD",
+    "notional_amount": 100000.0,
+    "issue_date": "2026-10-01",
+    "maturity_date": "2027-10-01",
+    "underlyings": [
+        {"symbol": "NVDA", "name": "NVIDIA Corp", "currency": "USD", "initial_fixing": 120.0}
+    ],
+    "barrier_schedule": [],
+    "accumulator_parameters": {
+        "strike_price": 102.0,
+        "strike_pct": 85.0,
+        "knock_out_barrier_pct": 105.0,
+        "knock_out_observation_type": "EUROPEAN",
+        "gearing_ratio": 2.0,
+        "daily_share_count": 100,
+        "total_observation_days": 60,
+        "guaranteed_days": 0
+    }
+}

@@ -47,10 +47,45 @@ class StressTestService:
                 stress_tests=stress_tests
             )
             
-        # Default fallback for other products
-        return RiskProfile(
-            maximum_loss=product.notional_amount,
-            unbounded_loss_statement="Loss is limited to the principal amount invested.",
-            gain_loss_shape="Symmetric or principal protected depending on product structure.",
-            stress_tests={}
-        )
+        else:
+            notional = product.notional_amount or 1000.0
+            capital_protection = product.capital_protection_pct or 0.0
+            
+            barrier = 0.0
+            if product.barrier_schedule:
+                for b in product.barrier_schedule:
+                    if b.knock_in_barrier_pct is not None:
+                        barrier = b.knock_in_barrier_pct / 100.0
+                        break
+
+            for name, drop in scenarios.items():
+                # End of period drop
+                price_pct = 1.0 + drop
+                
+                # Check if KI is breached
+                if barrier > 0 and price_pct <= barrier:
+                    # Breached KI -> Loss 1:1 with underlying, bounded by capital protection
+                    final_payout = max(capital_protection / 100.0, price_pct) * notional
+                elif barrier > 0 and price_pct > barrier:
+                    # Above KI -> Capital protected at par
+                    final_payout = notional
+                else:
+                    # No KI barrier, linear payout
+                    final_payout = max(capital_protection / 100.0, price_pct) * notional
+                    
+                pnl = final_payout - notional
+                
+                stress_tests[name] = StressScenarioOutcome(
+                    shares_transacted=0,
+                    cash_required=notional,
+                    pnl=pnl,
+                    margin_call_triggered=False,
+                    indicative_margin_size=0.0
+                )
+                
+            return RiskProfile(
+                maximum_loss=notional * (1 - (capital_protection / 100.0)),
+                unbounded_loss_statement="Loss is limited to the principal amount invested minus any capital protection floor.",
+                gain_loss_shape="Upside capped by coupon/autocall, Downside 1:1 with worst underlying if Knock-In is breached.",
+                stress_tests=stress_tests
+            )

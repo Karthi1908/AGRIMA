@@ -1,0 +1,12 @@
+{
+    "archetype": "FCN_AUTOCALL_NOTE",
+    "title": "3-Stock FCN",
+    "denomination_currency": "USD",
+    "notional_amount": 100000.0,
+    "issue_date": "2026-10-01",
+    "maturity_date": "2027-10-01",
+    "underlyings": [
+        {"symbol": "AAPL", "name": "Apple Inc", "currency": "USD", "initial_fixing": 150.0}
+    ],
+    "barrier_schedule": []
+}

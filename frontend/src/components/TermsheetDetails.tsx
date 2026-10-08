@@ -102,7 +102,7 @@ export const TermsheetDetails: React.FC<TermsheetDetailsProps> = ({
         </select>
       </FieldWrapper>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
         <FieldWrapper field="denomination_currency" label="Currency">
           <input
             type="text"
@@ -116,6 +116,15 @@ export const TermsheetDetails: React.FC<TermsheetDetailsProps> = ({
             type="number"
             value={product.notional_amount}
             onChange={(e) => handleFieldChange('notional_amount', parseFloat(e.target.value) || 0)}
+            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid var(--border-medium)', background: '#FFFFFF', fontFamily: 'var(--font-mono)' }}
+          />
+        </FieldWrapper>
+        <FieldWrapper field="capital_protection_pct" label="Capital Protection (%)">
+          <input
+            type="number"
+            step="any"
+            value={product.capital_protection_pct ?? 0}
+            onChange={(e) => handleFieldChange('capital_protection_pct', parseFloat(e.target.value) || 0)}
             style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid var(--border-medium)', background: '#FFFFFF', fontFamily: 'var(--font-mono)' }}
           />
         </FieldWrapper>

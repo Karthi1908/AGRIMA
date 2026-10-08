@@ -9,6 +9,7 @@ import { DciWorkspace } from './components/DciWorkspace';
 import { AccumulatorWorkspace } from './components/AccumulatorWorkspace';
 import { MultiAssetSliders } from './components/MultiAssetSliders';
 import { NarrativeCards } from './components/NarrativeCards';
+import { RiskAnalyticsPanel } from './components/RiskAnalyticsPanel';
 import { CompareMode } from './pages/CompareMode';
 import './styles/theme.css';
 
@@ -17,15 +18,15 @@ const DEMO_PRODUCTS: Record<string, StructuredProductDefinition> = {
   FCN: {
     product_id: 'demo-fcn-01',
     archetype: 'FCN_AUTOCALL_NOTE',
-    title: '3-Stock Worst-Of Fixed Coupon Note',
+    title: '3-Asset Worst-Of Fixed Coupon Note',
     denomination_currency: 'USD',
     notional_amount: 100000.0,
     issue_date: '2026-10-01',
     maturity_date: '2027-10-01',
     underlyings: [
-      { symbol: 'AAPL', name: 'Apple Inc.', currency: 'USD', initial_fixing: 225.0, simulated_price: 225.0, performance_pct: 0.0 },
-      { symbol: 'MSFT', name: 'Microsoft Corp.', currency: 'USD', initial_fixing: 430.0, simulated_price: 430.0, performance_pct: 0.0 },
-      { symbol: 'NVDA', name: 'NVIDIA Corp.', currency: 'USD', initial_fixing: 120.0, simulated_price: 120.0, performance_pct: 0.0 },
+      { symbol: 'EQ A', name: 'Equity Asset A', currency: 'USD', initial_fixing: 225.0, simulated_price: 225.0, performance_pct: 0.0 },
+      { symbol: 'EQ B', name: 'Equity Asset B', currency: 'USD', initial_fixing: 430.0, simulated_price: 430.0, performance_pct: 0.0 },
+      { symbol: 'EQ C', name: 'Equity Asset C', currency: 'USD', initial_fixing: 120.0, simulated_price: 120.0, performance_pct: 0.0 },
     ],
     barrier_schedule: [
       { period_index: 1, observation_date: '2026-11-01', knock_out_barrier_pct: 100.0, knock_in_barrier_pct: 70.0, coupon_barrier_pct: 80.0, coupon_rate_pct: 1.0, has_memory: true, knock_in_observation_type: 'EUROPEAN' },
@@ -59,13 +60,13 @@ const DEMO_PRODUCTS: Record<string, StructuredProductDefinition> = {
   STEP_DOWN: {
     product_id: 'demo-stepdown-01',
     archetype: 'STEP_DOWN_AUTOCALL_NOTE',
-    title: 'TSLA Step-Down Autocall Note',
+    title: 'Step-Down Autocall Note',
     denomination_currency: 'USD',
     notional_amount: 250000.0,
     issue_date: '2026-10-01',
     maturity_date: '2027-10-01',
     underlyings: [
-      { symbol: 'TSLA', name: 'Tesla Inc.', currency: 'USD', initial_fixing: 240.0, simulated_price: 240.0, performance_pct: 0.0 },
+      { symbol: 'EQ A', name: 'Equity Asset A', currency: 'USD', initial_fixing: 240.0, simulated_price: 240.0, performance_pct: 0.0 },
     ],
     barrier_schedule: [
       { period_index: 1, observation_date: '2027-01-01', knock_out_barrier_pct: 100.0, coupon_barrier_pct: 80.0, coupon_rate_pct: 2.625, has_memory: true, knock_in_observation_type: 'EUROPEAN' },
@@ -78,13 +79,13 @@ const DEMO_PRODUCTS: Record<string, StructuredProductDefinition> = {
   TWIN_WIN: {
     product_id: 'demo-twinwin-01',
     archetype: 'TWIN_WIN_NOTE',
-    title: 'SPY 18M Twin-Win Certificate',
+    title: '18M Twin-Win Certificate',
     denomination_currency: 'USD',
     notional_amount: 100000.0,
     issue_date: '2026-10-01',
     maturity_date: '2028-04-01',
     underlyings: [
-      { symbol: 'SPY', name: 'S&P 500 ETF', currency: 'USD', initial_fixing: 560.0, simulated_price: 560.0, performance_pct: 0.0 },
+      { symbol: 'IDX A', name: 'Index Asset A', currency: 'USD', initial_fixing: 560.0, simulated_price: 560.0, performance_pct: 0.0 },
     ],
     barrier_schedule: [
       { period_index: 1, observation_date: '2028-04-01', knock_in_barrier_pct: 75.0, coupon_rate_pct: 0.0, has_memory: false, knock_in_observation_type: 'AMERICAN' },
@@ -99,13 +100,13 @@ const DEMO_PRODUCTS: Record<string, StructuredProductDefinition> = {
   ACCUMULATOR: {
     product_id: 'demo-acc-01',
     archetype: 'EQUITY_ACCUMULATOR',
-    title: 'NVDA 60-Day Equity Share Accumulator',
+    title: '60-Day Equity Share Accumulator',
     denomination_currency: 'USD',
     notional_amount: 612000.0,
     issue_date: '2026-10-01',
     maturity_date: '2026-12-31',
     underlyings: [
-      { symbol: 'NVDA', name: 'NVIDIA Corp.', currency: 'USD', initial_fixing: 120.0, simulated_price: 120.0, performance_pct: 0.0 },
+      { symbol: 'EQ A', name: 'Equity Asset A', currency: 'USD', initial_fixing: 120.0, simulated_price: 120.0, performance_pct: 0.0 },
     ],
     barrier_schedule: [],
     capital_protection_pct: 0.0,
@@ -123,13 +124,13 @@ const DEMO_PRODUCTS: Record<string, StructuredProductDefinition> = {
   DECUMULATOR: {
     product_id: 'demo-dec-01',
     archetype: 'EQUITY_DECUMULATOR',
-    title: 'TSLA 60-Day Equity Share Decumulator',
+    title: '60-Day Equity Share Decumulator',
     denomination_currency: 'USD',
     notional_amount: 1656000.0,
     issue_date: '2026-10-01',
     maturity_date: '2026-12-31',
     underlyings: [
-      { symbol: 'TSLA', name: 'Tesla Inc.', currency: 'USD', initial_fixing: 240.0, simulated_price: 240.0, performance_pct: 0.0 },
+      { symbol: 'EQ A', name: 'Equity Asset A', currency: 'USD', initial_fixing: 240.0, simulated_price: 240.0, performance_pct: 0.0 },
     ],
     barrier_schedule: [],
     capital_protection_pct: 0.0,
@@ -147,30 +148,26 @@ const DEMO_PRODUCTS: Record<string, StructuredProductDefinition> = {
 };
 
 export const App: React.FC = () => {
-  const [product, setProduct] = useState<StructuredProductDefinition>(DEMO_PRODUCTS.FCN);
+  const [product, setProduct] = useState<StructuredProductDefinition | null>(null);
   const [extractionData, setExtractionData] = useState<TermsheetExtractionResponse | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isCompareMode, setIsCompareMode] = useState(false);
 
   // Simulated price map symbol -> price
-  const [simulatedPrices, setSimulatedPrices] = useState<Record<string, number>>(() => {
-    const initMap: Record<string, number> = {};
-    for (const u of DEMO_PRODUCTS.FCN.underlyings) {
-      initMap[u.symbol] = u.initial_fixing;
-    }
-    return initMap;
-  });
+  const [simulatedPrices, setSimulatedPrices] = useState<Record<string, number>>({});
 
   // Payoff state computed synchronously via ClientPayoffEngine at 60fps
-  const [simulationState, setSimulationState] = useState<PayoffSimulationState>(() =>
-    ClientPayoffEngine.calculatePayoff(DEMO_PRODUCTS.FCN, simulatedPrices)
-  );
+  const [simulationState, setSimulationState] = useState<PayoffSimulationState | null>(null);
 
   // Re-calculate payoff whenever product or simulated prices change
   useEffect(() => {
-    const newState = ClientPayoffEngine.calculatePayoff(product, simulatedPrices);
-    setSimulationState(newState);
+    if (product) {
+      const newState = ClientPayoffEngine.calculatePayoff(product, simulatedPrices);
+      setSimulationState(newState);
+    } else {
+      setSimulationState(null);
+    }
   }, [product, simulatedPrices]);
 
   const handleExtractionComplete = (response: TermsheetExtractionResponse) => {
@@ -202,15 +199,17 @@ export const App: React.FC = () => {
   };
 
   const handleResetSession = () => {
-    handleSelectDemo('FCN');
+    setProduct(null);
+    setSimulationState(null);
+    setSimulatedPrices({});
     setExtractionData(null);
   };
 
-  const isDciProduct = product.archetype === 'DCI';
+  const isDciProduct = product?.archetype === 'DCI';
   const isAccumulatorOrDecumulator =
-    product.archetype === 'EQUITY_ACCUMULATOR' || product.archetype === 'EQUITY_DECUMULATOR';
+    product?.archetype === 'EQUITY_ACCUMULATOR' || product?.archetype === 'EQUITY_DECUMULATOR';
 
-  if (isCompareMode) {
+  if (isCompareMode && product) {
     const altProduct = JSON.parse(JSON.stringify(product));
     altProduct.title = `Alternative: ${altProduct.title}`;
     if (altProduct.accumulator_parameters) {
@@ -352,7 +351,7 @@ export const App: React.FC = () => {
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button
               type="button"
-              className={product.archetype === 'DCI' ? 'btn-primary' : 'btn-secondary'}
+              className={product?.archetype === 'DCI' ? 'btn-primary' : 'btn-secondary'}
               style={{ fontSize: '0.78rem', padding: '6px 14px' }}
               onClick={() => handleSelectDemo('DCI')}
             >
@@ -360,15 +359,15 @@ export const App: React.FC = () => {
             </button>
             <button
               type="button"
-              className={product.archetype === 'FCN_AUTOCALL_NOTE' ? 'btn-primary' : 'btn-secondary'}
+              className={product?.archetype === 'FCN_AUTOCALL_NOTE' ? 'btn-primary' : 'btn-secondary'}
               style={{ fontSize: '0.78rem', padding: '6px 14px' }}
               onClick={() => handleSelectDemo('FCN')}
             >
-              3-Stock FCN (Worst-Of)
+              3-Asset FCN (Worst-Of)
             </button>
             <button
               type="button"
-              className={product.archetype === 'STEP_DOWN_AUTOCALL_NOTE' ? 'btn-primary' : 'btn-secondary'}
+              className={product?.archetype === 'STEP_DOWN_AUTOCALL_NOTE' ? 'btn-primary' : 'btn-secondary'}
               style={{ fontSize: '0.78rem', padding: '6px 14px' }}
               onClick={() => handleSelectDemo('STEP_DOWN')}
             >
@@ -376,7 +375,7 @@ export const App: React.FC = () => {
             </button>
             <button
               type="button"
-              className={product.archetype === 'TWIN_WIN_NOTE' ? 'btn-primary' : 'btn-secondary'}
+              className={product?.archetype === 'TWIN_WIN_NOTE' ? 'btn-primary' : 'btn-secondary'}
               style={{ fontSize: '0.78rem', padding: '6px 14px' }}
               onClick={() => handleSelectDemo('TWIN_WIN')}
             >
@@ -384,140 +383,149 @@ export const App: React.FC = () => {
             </button>
             <button
               type="button"
-              className={product.archetype === 'EQUITY_ACCUMULATOR' ? 'btn-primary' : 'btn-secondary'}
+              className={product?.archetype === 'EQUITY_ACCUMULATOR' ? 'btn-primary' : 'btn-secondary'}
               style={{ fontSize: '0.78rem', padding: '6px 14px' }}
               onClick={() => handleSelectDemo('ACCUMULATOR')}
             >
-              NVDA Accumulator
+              Accumulator
             </button>
             <button
               type="button"
-              className={product.archetype === 'EQUITY_DECUMULATOR' ? 'btn-primary' : 'btn-secondary'}
+              className={product?.archetype === 'EQUITY_DECUMULATOR' ? 'btn-primary' : 'btn-secondary'}
               style={{ fontSize: '0.78rem', padding: '6px 14px' }}
               onClick={() => handleSelectDemo('DECUMULATOR')}
             >
-              TSLA Decumulator
+              Decumulator
             </button>
           </div>
         </div>
 
         {/* DYNAMIC WORKSPACE: DCI vs ACCUMULATOR vs AUTOCALL */}
-        {isDciProduct ? (
-          /* When DCI: Show exclusively DCI termsheet specs & yield simulation, hiding all autocall displays */
-          <DciWorkspace
-            product={product}
-            simulatedSpot={simulatedPrices[product.underlyings[0]?.symbol] || product.dci_parameters?.strike_rate || 1.08}
-            onSpotChange={(newSpot) => {
-              const sym = product.underlyings[0]?.symbol;
-              if (sym) {
-                setSimulatedPrices({ ...simulatedPrices, [sym]: newSpot });
-              }
-            }}
-          />
-        ) : isAccumulatorOrDecumulator ? (
-          /* When Accumulator or Decumulator: Show specialized accumulator workspace */
-          <AccumulatorWorkspace
-            product={product}
-            simulatedSpot={simulatedPrices[product.underlyings[0]?.symbol] ?? product.underlyings[0]?.initial_fixing ?? 100}
-            onSpotChange={(newSpot) => {
-              const sym = product.underlyings[0]?.symbol;
-              if (sym) {
-                setSimulatedPrices({ ...simulatedPrices, [sym]: newSpot });
-              }
-            }}
-          />
-        ) : (
-          /* When NOT DCI or Accumulator (Autocall / FCN / Step-Down / Twin-Win): Show 2-column Autocall Workspace */
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.7fr) minmax(360px, 1fr)', gap: '24px' }}>
-            {/* Left Column: 2D Payoff Canvas */}
-            <div>
-              <PayoffCanvas
+        {product && (
+          <>
+            {isDciProduct ? (
+              /* When DCI: Show exclusively DCI termsheet specs & yield simulation, hiding all autocall displays */
+              <DciWorkspace
                 product={product}
-                simulationState={simulationState}
-                simulatedPrices={simulatedPrices}
+                simulatedSpot={simulatedPrices[product.underlyings[0]?.symbol] || product.dci_parameters?.strike_rate || 1.08}
+                onSpotChange={(newSpot) => {
+                  const sym = product.underlyings[0]?.symbol;
+                  if (sym) {
+                    setSimulatedPrices({ ...simulatedPrices, [sym]: newSpot });
+                  }
+                }}
               />
-            </div>
-
-            {/* Right Column: Autocall Scenario Metrics & Basket Sliders */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* Autocall Outcome Card */}
-              <div className="editorial-card" style={{ padding: '24px', background: 'var(--bg-card)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    Simulated Scenario Outcome
-                  </h3>
-                  {simulationState.is_knocked_out ? (
-                    <span className="badge badge-sage">Autocalled (Period {simulationState.early_redemption_period})</span>
-                  ) : simulationState.is_knocked_in ? (
-                    <span className="badge badge-crimson">Knock-In Barrier Breached</span>
-                  ) : (
-                    <span className="badge badge-sage">Capital Protected at Par</span>
-                  )}
+            ) : isAccumulatorOrDecumulator ? (
+              /* When Accumulator or Decumulator: Show specialized accumulator workspace */
+              <AccumulatorWorkspace
+                product={product}
+                simulatedSpot={simulatedPrices[product.underlyings[0]?.symbol] ?? product.underlyings[0]?.initial_fixing ?? 100}
+                onSpotChange={(newSpot) => {
+                  const sym = product.underlyings[0]?.symbol;
+                  if (sym) {
+                    setSimulatedPrices({ ...simulatedPrices, [sym]: newSpot });
+                  }
+                }}
+              />
+            ) : simulationState ? (
+              /* When NOT DCI or Accumulator (Autocall / FCN / Step-Down / Twin-Win): Show 2-column Autocall Workspace */
+              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.7fr) minmax(360px, 1fr)', gap: '24px' }}>
+                {/* Left Column: 2D Payoff Canvas */}
+                <div>
+                  <PayoffCanvas
+                    product={product}
+                    simulationState={simulationState}
+                    simulatedPrices={simulatedPrices}
+                  />
                 </div>
 
-                {/* Return Display */}
-                <div style={{ textAlign: 'center', padding: '16px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    Net Total Return
-                  </span>
-                  <div
-                    style={{
-                      fontSize: '2.5rem',
-                      fontWeight: 700,
-                      fontFamily: 'var(--font-mono)',
-                      color: simulationState.net_total_return_pct >= 0 ? 'var(--status-sage)' : 'var(--status-crimson)',
-                      marginTop: '4px',
+                {/* Right Column: Autocall Scenario Metrics & Basket Sliders */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* Autocall Outcome Card */}
+                  <div className="editorial-card" style={{ padding: '24px', background: 'var(--bg-card)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                        Simulated Scenario Outcome
+                      </h3>
+                      {simulationState.is_knocked_out ? (
+                        <span className="badge badge-sage">Autocalled (Period {simulationState.early_redemption_period})</span>
+                      ) : simulationState.is_knocked_in ? (
+                        <span className="badge badge-crimson">Knock-In Barrier Breached</span>
+                      ) : (
+                        <span className="badge badge-sage">Capital Protected at Par</span>
+                      )}
+                    </div>
+
+                    {/* Return Display */}
+                    <div style={{ textAlign: 'center', padding: '16px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Net Total Return
+                      </span>
+                      <div
+                        style={{
+                          fontSize: '2.5rem',
+                          fontWeight: 700,
+                          fontFamily: 'var(--font-mono)',
+                          color: simulationState.net_total_return_pct >= 0 ? 'var(--status-sage)' : 'var(--status-crimson)',
+                          marginTop: '4px',
+                        }}
+                      >
+                        {simulationState.net_total_return_pct >= 0 ? '+' : ''}
+                        {simulationState.net_total_return_pct.toFixed(2)}%
+                      </div>
+                      <div style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                        Payout: {product.denomination_currency}{' '}
+                        {simulationState.net_payout_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                    </div>
+
+                    {/* Metrics Breakdown */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '16px' }}>
+                      <div style={{ background: 'var(--bg-card-alt)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Capital Repaid</span>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
+                          {simulationState.capital_repaid_pct.toFixed(2)}%
+                        </div>
+                      </div>
+
+                      <div style={{ background: 'var(--bg-card-alt)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Coupons Earned</span>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--terracotta-primary)', fontFamily: 'var(--font-mono)' }}>
+                          +{simulationState.total_coupons_earned_pct.toFixed(2)}%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Underlying Asset Sliders */}
+                  <MultiAssetSliders
+                    product={product}
+                    simulationState={simulationState}
+                    simulatedPrices={simulatedPrices}
+                    onPriceChange={(symbol, newPx) => {
+                      setSimulatedPrices({ ...simulatedPrices, [symbol]: newPx });
                     }}
-                  >
-                    {simulationState.net_total_return_pct >= 0 ? '+' : ''}
-                    {simulationState.net_total_return_pct.toFixed(2)}%
-                  </div>
-                  <div style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                    Payout: {product.denomination_currency}{' '}
-                    {simulationState.net_payout_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </div>
-                </div>
-
-                {/* Metrics Breakdown */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '16px' }}>
-                  <div style={{ background: 'var(--bg-card-alt)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-                    <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Capital Repaid</span>
-                    <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
-                      {simulationState.capital_repaid_pct.toFixed(2)}%
-                    </div>
-                  </div>
-
-                  <div style={{ background: 'var(--bg-card-alt)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-                    <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Coupons Earned</span>
-                    <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--terracotta-primary)', fontFamily: 'var(--font-mono)' }}>
-                      +{simulationState.total_coupons_earned_pct.toFixed(2)}%
-                    </div>
-                  </div>
+                    onResetAll={() => {
+                      const resetMap: Record<string, number> = {};
+                      for (const u of product.underlyings) {
+                        resetMap[u.symbol] = u.initial_fixing;
+                      }
+                      setSimulatedPrices(resetMap);
+                    }}
+                  />
                 </div>
               </div>
+            ) : null}
 
-              {/* Underlying Asset Sliders */}
-              <MultiAssetSliders
-                product={product}
-                simulationState={simulationState}
-                simulatedPrices={simulatedPrices}
-                onPriceChange={(symbol, newPx) => {
-                  setSimulatedPrices({ ...simulatedPrices, [symbol]: newPx });
-                }}
-                onResetAll={() => {
-                  const resetMap: Record<string, number> = {};
-                  for (const u of product.underlyings) {
-                    resetMap[u.symbol] = u.initial_fixing;
-                  }
-                  setSimulatedPrices(resetMap);
-                }}
-              />
-            </div>
-          </div>
+            {/* Full-width Risk Analytics (Moved out of right column) */}
+            {!isDciProduct && !isAccumulatorOrDecumulator && (
+              <RiskAnalyticsPanel product={product} />
+            )}
+
+            {/* Client Scenario Narratives */}
+            <NarrativeCards product={product} />
+          </>
         )}
-
-        {/* Client Scenario Narratives */}
-        <NarrativeCards product={product} />
       </main>
 
       {/* Verification Drawer */}

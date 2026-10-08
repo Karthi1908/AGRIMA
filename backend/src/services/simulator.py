@@ -156,16 +156,106 @@ class SimulationEngine:
 
     @staticmethod
     def _evaluate_generic(S_paths: np.ndarray, product: StructuredProductDefinition, assumptions: SimulationAssumptions) -> SimulationResult:
+        paths, days_plus_one, num_assets = S_paths.shape
+        days = days_plus_one - 1
+        
+        # We assume asset 0 is the worst-of for simplified path stats, or we use minimum path performance
+        S0 = np.array([u.initial_fixing for u in product.underlyings])
+        
+        # Min performance path across all assets
+        perf_paths = S_paths / S0[None, None, :]
+        min_perf_paths = np.min(perf_paths, axis=2) # Shape: (paths, days_plus_one)
+        S = min_perf_paths[:, 1:] * 100.0 # Normalized to 100 strike
+        
+        schedule = sorted(product.barrier_schedule, key=lambda b: b.period_index) if product.barrier_schedule else []
+        final_obs = schedule[-1] if schedule else None
+        
+        ko_barrier = 105.0
+        for obs in schedule:
+            if obs.knock_out_barrier_pct is not None:
+                ko_barrier = obs.knock_out_barrier_pct
+                break
+                
+        ki_barrier = final_obs.knock_in_barrier_pct if (final_obs and final_obs.knock_in_barrier_pct is not None) else 70.0
+        ki_type = final_obs.knock_in_observation_type if final_obs else "EUROPEAN"
+        coupon_rate = sum(obs.coupon_rate_pct for obs in schedule) if schedule else 5.0
+        
+        # Determine discrete observation days (approx equidistant)
+        num_periods = len(schedule) if schedule else 1
+        obs_days = [int(days * (i + 1) / num_periods) - 1 for i in range(num_periods)]
+        
+        pnl = np.zeros(paths)
+        shares_accumulated = np.zeros(paths)
+        is_ko = np.zeros(paths, dtype=bool)
+        ko_days = np.zeros(paths, dtype=int)
+        
+        for p in range(paths):
+            # Check discrete knock-out
+            knocked_out = False
+            for i, obs_day in enumerate(obs_days):
+                if S[p, obs_day] >= ko_barrier:
+                    is_ko[p] = True
+                    ko_days[p] = obs_day
+                    # Prorated coupon based on periods survived + 1 for the KO period
+                    pnl[p] = coupon_rate * ((i + 1) / num_periods)
+                    knocked_out = True
+                    break
+            
+            if not knocked_out:
+                final_price = S[p, -1]
+                if ki_type == "AMERICAN":
+                    knocked_in = np.any(S[p] <= ki_barrier)
+                else:
+                    knocked_in = final_price <= ki_barrier
+                
+                # Check capital protection (if final price is below 100 and knocked in)
+                cap_prot = product.capital_protection_pct if product.capital_protection_pct is not None else 0.0
+                
+                if knocked_in and final_price < 100.0:
+                    loss_pct = (100.0 - final_price)
+                    # Cannot lose more than 100 - cap_prot
+                    loss_pct = min(loss_pct, 100.0 - cap_prot)
+                    pnl[p] = coupon_rate - loss_pct
+                    shares_accumulated[p] = 100.0 / 100.0
+                else:
+                    pnl[p] = coupon_rate
+                    
+        ko_prob = np.mean(is_ko)
+                    
+        exp_pnl = np.mean(pnl)
+        prob_loss = np.mean(pnl < 0)
+        pnl_percentiles = np.percentile(pnl, [5, 25, 50, 75, 95], method='linear')
+        worst_5_loss = np.mean(pnl[pnl <= pnl_percentiles[0]]) if np.any(pnl <= pnl_percentiles[0]) else 0.0
+        
+        median_idx = np.argsort(pnl)[paths // 2]
+        worst_idx = np.argmin(pnl)
+        
+        def get_path_result(idx):
+            d = ko_days[idx] if is_ko[idx] else days
+            running_pnl = np.zeros(d)
+            if d > 0:
+                running_pnl[-1] = pnl[idx]
+            return PathResult(
+                day_by_day_accumulation=np.zeros(d).tolist(),
+                running_pnl=running_pnl.tolist(),
+                knock_out_date=str(d) if is_ko[idx] else None
+            )
+
+        rep_paths = {
+            "median": get_path_result(median_idx),
+            "worst": get_path_result(worst_idx)
+        }
+        
         return SimulationResult(
-            knock_out_probability=0.0,
-            expected_shares=0.0,
+            knock_out_probability=float(ko_prob),
+            expected_shares=float(np.mean(shares_accumulated)),
             percentile_5_shares=0.0,
             percentile_50_shares=0.0,
             percentile_95_shares=0.0,
-            pnl_distribution=[0.0, 0.0, 0.0, 0.0, 0.0],
-            expected_pnl=0.0,
-            probability_of_loss=0.0,
-            worst_5_percent_average_loss=0.0,
+            pnl_distribution=pnl_percentiles.tolist(),
+            expected_pnl=float(exp_pnl),
+            probability_of_loss=float(prob_loss),
+            worst_5_percent_average_loss=float(worst_5_loss),
             method=assumptions.method,
-            representative_paths={}
+            representative_paths=rep_paths
         )

@@ -15,7 +15,7 @@ export interface PrintAssumptions {
   path_count: number;
   seed: number;
   method: string;
-  correlation?: number | null;
+  correlation?: number[][] | null;
 }
 
 export const DEFAULT_DISCLAIMER =
@@ -91,7 +91,7 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({
       <div style={{ fontSize: '12px' }}>
         Volatility {pct(assumptions.volatility)} · Drift {pct(drift)} · Dividend yield {pct(assumptions.dividend_yield)} ·
         Paths {assumptions.path_count.toLocaleString()} · Seed {assumptions.seed}
-        {assumptions.correlation != null && <> · Correlation {assumptions.correlation.toFixed(2)} (assumption)</>}
+        {assumptions.correlation != null && <> · Correlation {JSON.stringify(assumptions.correlation)}</>}
       </div>
 
       <div style={sectionTitle(accent)}>Risk Distribution</div>
