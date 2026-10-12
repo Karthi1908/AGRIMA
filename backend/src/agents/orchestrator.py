@@ -12,7 +12,13 @@ class ADKOrchestrator:
     def __init__(self, model_name: str = None):
         self.api_key = os.getenv("GEMINI_API_KEY")
         self.model_name = model_name or os.getenv("GEMINI_FLASH_MODEL", "gemini-3.8-flash")
-        self.client = genai.Client(api_key=self.api_key)
+        self._client = None
+
+    @property
+    def client(self):
+        if self._client is None:
+            self._client = genai.Client(api_key=self.api_key)
+        return self._client
 
     def generate_structured_response(self, prompt: str, schema: Type[T], files: List[Any] = None) -> T:
         import json

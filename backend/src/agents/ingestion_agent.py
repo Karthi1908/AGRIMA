@@ -12,6 +12,7 @@ import os
 import re
 import time
 import logging
+from typing import Tuple, Optional
 from pypdf import PdfReader
 from pypdf.errors import FileNotDecryptedError
 from backend.src.agents.llm_client import get_gemini_api_key

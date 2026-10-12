@@ -209,7 +209,7 @@ export const RiskAnalyticsPanel: React.FC<RiskAnalyticsPanelProps> = ({ product,
           {draft.driftOverride && (
             <input id="assump-drift" style={{ ...inputStyle, width: '100px' }} value={draft.driftValue} onChange={e => set('driftValue', e.target.value)} />
           )}
-          <button id="run-simulation" className="btn-primary" onClick={run} disabled={loading}>
+          <button id="run-simulation" className="btn-primary" onClick={() => run()} disabled={loading}>
             {result ? 'Re-run Simulation' : 'Run Simulation'}
           </button>
           {stale && <span style={{ color: '#B45309' }}>Assumptions changed — results are stale.</span>}

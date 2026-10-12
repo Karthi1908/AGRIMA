@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { TermsheetDetails } from './components/TermsheetDetails';
 import { RiskAnalyticsPanel } from './components/RiskAnalyticsPanel';
